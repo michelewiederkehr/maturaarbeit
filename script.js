@@ -22,8 +22,9 @@ function zeigeStandort() {
 
             marker = L.marker([lat, lng]).addTo(map);
         },
+
         function (error) {
-            alert("Standort konnte nicht abgerufen werden");
+            alert("Standort konnte nicht abgerufen werden!");
         }
     );
 }
