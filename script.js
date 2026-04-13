@@ -7,27 +7,51 @@ var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 var marker;
+var watchId = null;
+
+var standortIcon = L.divIcon({
+    className: "standort-marker-blau",
+    html: '<div style="width: 10px; height: 10px; background: #1a73e8; border: 2px solid white; border-radius: 50%; box-shadow: 0px 0px 6px rgba(0,0,0,0.3);"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+})
+
 
 function zeigeStandort() {
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            var lat = position.coords.latitude;
-            var lng = position.coords.longitude;
+    if (watchId !== null) {
+        return;
+    }
 
-            map.setView([lat, lng], 16);
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(
 
-            if (marker) {
-                map.removeLayer(marker);
+            function (position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+
+                map.setView([lat, lng], 16);
+
+                if (!marker) {
+                    marker = L.marker([lat, lng], { icon: standortIcon }).addTo(map);
+                }
+                else {
+                    marker.setLatLng([lat, lng]);
+                }
+            },
+
+            function (error) {
+                alert("Standort konnte nicht dauerhaft überwacht werden!");
+            },
+            {
+                enableHighAccuracy: true
             }
-
-            marker = L.marker([lat, lng]).addTo(map);
-        },
-
-        function (error) {
-            alert("Standort konnte nicht abgerufen werden!");
-        }
-    );
+        );
+    }
+    else {
+        alert("GPS wird nicht unterstützt!");
+    }
 }
+
 
 //Massstabsbalken
 L.control.scale({
