@@ -28,3 +28,9 @@ function zeigeStandort() {
         }
     );
 }
+
+//Massstabsbalken
+L.control.scale({
+    position: "bottomright",
+    imperial: false //
+}).addTo(map);
