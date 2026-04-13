@@ -9,6 +9,7 @@ var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var marker;
 var watchId = null;
 
+//Benutzerdefiniertes Standorticon (blauer Punkt)
 var standortIcon = L.divIcon({
     className: "standort-marker-blau",
     html: '<div style="width: 10px; height: 10px; background: #1a73e8; border: 2px solid white; border-radius: 50%; box-shadow: 0px 0px 6px rgba(0,0,0,0.3);"></div>',
@@ -16,7 +17,7 @@ var standortIcon = L.divIcon({
     iconAnchor: [5, 5]
 })
 
-
+//Funktion zur Anzeige des Live Standorts
 function zeigeStandort() {
     if (watchId !== null) {
         return;
@@ -52,9 +53,28 @@ function zeigeStandort() {
     }
 }
 
+//Benutzerdefinierter Marker, welcher verschoben werden kann
+map.on("click", function(e) {
+    var mc = new L.marker([e.latlng.lat, e.latlng.lng],{
+        draggable: true
+    }
+    ).addTo(map);
+})
+
+//Auswählen eines Markers
+
+
+//Löschen des ausgewählten Markers mithilfe eines eingeblendeten Buttons
+
+
 
 //Massstabsbalken
 L.control.scale({
     position: "bottomright",
     imperial: false //
 }).addTo(map);
+
+var options = {
+    position: "topright",
+};
+L.control.locate(options).addTo(map);
