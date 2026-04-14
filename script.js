@@ -6,7 +6,7 @@ var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-var marker;
+var standortMarker = null;
 var watchId = null;
 
 //Benutzerdefiniertes Standorticon (blauer Punkt)
@@ -32,11 +32,11 @@ function zeigeStandort() {
 
                 map.setView([lat, lng], 16);
 
-                if (!marker) {
-                    marker = L.marker([lat, lng], { icon: standortIcon }).addTo(map);
+                if (!standortMarker) {
+                    standortMarker = L.marker([lat, lng], { icon: standortIcon }).addTo(map);
                 }
                 else {
-                    marker.setLatLng([lat, lng]);
+                    standortMarker.setLatLng([lat, lng]);
                 }
             },
 
@@ -53,20 +53,52 @@ function zeigeStandort() {
     }
 }
 
+var markerListe = [];
+var geloeschteMarker = [];
+var id = 0;
+
 //Benutzerdefinierter Marker, welcher verschoben werden kann
 map.on("click", function(e) {
-    var mc = new L.marker([e.latlng.lat, e.latlng.lng],{
+    var neuerMarker = new L.marker([e.latlng.lat, e.latlng.lng],{
         draggable: true
-    }
-    ).addTo(map);
+    }).addTo(map);
+    
+    neuerMarker.id = id;
+    id = id + 1;    
+    alert("Marker ID: " + neuerMarker.id);
+   
+    markerListe.push(neuerMarker);
 })
 
-//Auswählen eines Markers
+//Rückgängig
+function rueckgaengig() {
+     // Prüfen, ob Marker vorhanden sind
+    if (markerListe.length > 0) {
+        var letzterMarker = markerListe.pop();
+        map.removeLayer(letzterMarker);
+        geloeschteMarker.push(letzterMarker);
+
+        alert("Marker entfernt (ID: " + letzterMarker.id + ")");
+    }
+    else {
+        alert("Keine Marker zum Entfernen vorhanden");
+    }
+}
 
 
-//Löschen des ausgewählten Markers mithilfe eines eingeblendeten Buttons
+//Wiederherstellen
+function wiederherstellen() {
+    if (geloeschteMarker.length > 0) {
+        var marker = geloeschteMarker.pop();
+        marker.addTo(map);
+        markerListe.push(marker);
 
-
+        alert("Marker wiederhergestellt (ID: " + marker.id + ")");
+    }
+    else {
+        alert("Keine Marker zum Wiederherstellen vorhanden");
+    }
+}
 
 //Massstabsbalken
 L.control.scale({
