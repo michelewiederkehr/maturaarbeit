@@ -8,6 +8,8 @@ var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var standortMarker = null;
 var watchId = null;
+var aktuelleLat = null;
+var aktuelleLng = null;
 
 //Benutzerdefiniertes Standorticon (blauer Punkt)
 var standortIcon = L.divIcon({
@@ -30,6 +32,9 @@ function zeigeStandort() {
                 var lat = position.coords.latitude;
                 var lng = position.coords.longitude;
 
+                aktuelleLat = lat;
+                aktuelleLng = lng;
+
                 map.setView([lat, lng], 16);
 
                 if (!standortMarker) {
@@ -37,6 +42,9 @@ function zeigeStandort() {
                 }
                 else {
                     standortMarker.setLatLng([lat, lng]);
+                }
+                if (gespeichert == true) {
+                    postenerkennung(lat, lng);
                 }
             },
 
@@ -60,14 +68,17 @@ var id = 0;
 //Benutzerdefinierter Marker, welcher verschoben werden kann
 map.on("click", function(e) {
     if (gespeichert) {
-    alert("Die Posten wurden bereits gespeichert. Es können keine neuen Posten hinzugefügt werden.");
+    alert("Die Posten wurden bereits gespeichert. Es können keine neuen Posten mehr hinzugefügt werden.");
     return;
+    }
     var neuerMarker = new L.marker([e.latlng.lat, e.latlng.lng],{
-        draggable: true
+        draggable: true,
+        icon: blauesIcon
     }).addTo(map);
     
     neuerMarker.id = id;
-    id = id + 1;    
+    id = id + 1;
+    neuerMarker.erkannt = false;
     alert("Marker ID: " + neuerMarker.id);
    
     markerListe.push(neuerMarker);
@@ -75,7 +86,7 @@ map.on("click", function(e) {
 
 //Rückgängig
 function rueckgaengig() {
-    if (gespeichert) {
+    if (gespeichert == true) {
         alert("Die Posten wurden bereits gespeichert. Rückgängig ist nicht mehr möglch.")
         return;
     }
@@ -92,9 +103,13 @@ function rueckgaengig() {
     }
 }
 
-
 //Wiederherstellen
 function wiederherstellen() {
+    if (gespeichert == true) {
+        alert("Die Posten wurden bereits gespeichert. Wiederherstellen ist nicht mehr möglch.")
+        return;
+    }
+    
     if (geloeschteMarker.length > 0) {
         var marker = geloeschteMarker.pop();
         marker.addTo(map);
@@ -107,10 +122,10 @@ function wiederherstellen() {
     }
 }
 
+//Speichern der Posten
 var gespeichert = false;
 
 function speichern() {
-    gespeichert = true;
     if (markerListe.length == 0){
         alert("Keine Marker zum Speichern vorhanden");
         return;
@@ -118,7 +133,56 @@ function speichern() {
     markerListe.forEach(function(marker){
         marker.dragging.disable();
     });
+    gespeichert = true;
+
+    if (aktuelleLat !== null && aktuelleLng !== null) {
+        postenerkennung(aktuelleLat, aktuelleLng);
+    }
+
     alert("Alle Posten wurden gespeichert. Sie können nun nicht mehr verschoben werden.");
+}
+
+//Blauer Marker
+var blauesIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+//Grüner Marker
+var gruenesIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+//Ton
+var ton = new Audio("ton.mp3");
+
+//Postenerkennung
+function postenerkennung(lat, lng) {
+    markerListe.forEach(function(marker){
+        var markerPosition = marker.getLatLng();
+        var distanz = map.distance([lat, lng], markerPosition);
+            
+        console.log("Distanz zu Marker " + marker.id + ": " + distanz.toFixed(2) + " m");
+        
+        if (distanz < 20) {
+            if (!marker.erkannt) {
+                marker.setIcon(gruenesIcon);
+                marker.erkannt = true;
+                ton.play();
+
+                alert("Posten erreicht! Marker ID: " + marker.id);
+            }
+        }
+    });              
 }
 
 //Massstabsbalken
