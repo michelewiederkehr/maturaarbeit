@@ -59,6 +59,9 @@ var id = 0;
 
 //Benutzerdefinierter Marker, welcher verschoben werden kann
 map.on("click", function(e) {
+    if (gespeichert) {
+    alert("Die Posten wurden bereits gespeichert. Es können keine neuen Posten hinzugefügt werden.");
+    return;
     var neuerMarker = new L.marker([e.latlng.lat, e.latlng.lng],{
         draggable: true
     }).addTo(map);
@@ -106,7 +109,7 @@ function wiederherstellen() {
 
 var gespeichert = false;
 
-function speichern(){
+function speichern() {
     gespeichert = true;
     if (markerListe.length == 0){
         alert("Keine Marker zum Speichern vorhanden");
