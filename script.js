@@ -72,6 +72,10 @@ map.on("click", function(e) {
 
 //Rückgängig
 function rueckgaengig() {
+    if (gespeichert) {
+        alert("Die Posten wurden bereits gespeichert. Rückgängig ist nicht mehr möglch.")
+        return;
+    }
      // Prüfen, ob Marker vorhanden sind
     if (markerListe.length > 0) {
         var letzterMarker = markerListe.pop();
@@ -98,6 +102,20 @@ function wiederherstellen() {
     else {
         alert("Keine Marker zum Wiederherstellen vorhanden");
     }
+}
+
+var gespeichert = false;
+
+function speichern(){
+    gespeichert = true;
+    if (markerListe.length == 0){
+        alert("Keine Marker zum Speichern vorhanden");
+        return;
+    }
+    markerListe.forEach(function(marker){
+        marker.dragging.disable();
+    });
+    alert("Alle Posten wurden gespeichert. Sie können nun nicht mehr verschoben werden.");
 }
 
 //Massstabsbalken
