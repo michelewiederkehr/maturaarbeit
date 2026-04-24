@@ -185,6 +185,7 @@ function postenerkennung(lat, lng) {
     });
 }
 
+//Zeitmessung im Format Stunden:Minuten:Sekunden
 var startZeit = null;
 var timer = null;
 var laufAktiv = false;
