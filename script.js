@@ -66,21 +66,21 @@ var geloeschteMarker = [];
 var id = 0;
 
 //Benutzerdefinierter Marker, welcher verschoben werden kann
-map.on("click", function(e) {
+map.on("click", function (e) {
     if (gespeichert) {
-    alert("Die Posten wurden bereits gespeichert. Es können keine neuen Posten mehr hinzugefügt werden.");
-    return;
+        alert("Die Posten wurden bereits gespeichert. Es können keine neuen Posten mehr hinzugefügt werden.");
+        return;
     }
-    var neuerMarker = new L.marker([e.latlng.lat, e.latlng.lng],{
+    var neuerMarker = new L.marker([e.latlng.lat, e.latlng.lng], {
         draggable: true,
         icon: blauesIcon
     }).addTo(map);
-    
+
     neuerMarker.id = id;
     id = id + 1;
     neuerMarker.erkannt = false;
     alert("Marker ID: " + neuerMarker.id);
-   
+
     markerListe.push(neuerMarker);
 })
 
@@ -90,7 +90,7 @@ function rueckgaengig() {
         alert("Die Posten wurden bereits gespeichert. Rückgängig ist nicht mehr möglch.")
         return;
     }
-     // Prüfen, ob Marker vorhanden sind
+    // Prüfen, ob Marker vorhanden sind
     if (markerListe.length > 0) {
         var letzterMarker = markerListe.pop();
         map.removeLayer(letzterMarker);
@@ -109,7 +109,7 @@ function wiederherstellen() {
         alert("Die Posten wurden bereits gespeichert. Wiederherstellen ist nicht mehr möglch.")
         return;
     }
-    
+
     if (geloeschteMarker.length > 0) {
         var marker = geloeschteMarker.pop();
         marker.addTo(map);
@@ -126,11 +126,11 @@ function wiederherstellen() {
 var gespeichert = false;
 
 function speichern() {
-    if (markerListe.length == 0){
+    if (markerListe.length == 0) {
         alert("Keine Marker zum Speichern vorhanden");
         return;
     }
-    markerListe.forEach(function(marker){
+    markerListe.forEach(function (marker) {
         marker.dragging.disable();
     });
     gespeichert = true;
@@ -167,12 +167,12 @@ var ton = new Audio("ton.mp3");
 
 //Postenerkennung
 function postenerkennung(lat, lng) {
-    markerListe.forEach(function(marker){
+    markerListe.forEach(function (marker) {
         var markerPosition = marker.getLatLng();
         var distanz = map.distance([lat, lng], markerPosition);
-            
+
         console.log("Distanz zu Marker " + marker.id + ": " + distanz.toFixed(2) + " m");
-        
+
         if (distanz < 20) {
             if (!marker.erkannt) {
                 marker.setIcon(gruenesIcon);
@@ -182,7 +182,64 @@ function postenerkennung(lat, lng) {
                 alert("Posten erreicht! Marker ID: " + marker.id);
             }
         }
-    });              
+    });
+}
+
+var startZeit = null;
+var timer = null;
+var laufAktiv = false;
+
+function start() {
+    if (gespeichert == false) {
+        alert("Bitte speichere zuerst die Posten, bevor du den Lauf startest.");
+        return;
+    }
+
+    if (laufAktiv == true) {
+        alert("Die Zeit läuft bereits.");
+        return;
+    }
+
+    startZeit = new Date();
+    laufAktiv = true;
+
+    timer = setInterval(function () {
+        var aktuelleZeit = new Date();
+        var zeitInMillisekunden = aktuelleZeit - startZeit;
+
+        zeitAnzeigen(zeitInMillisekunden);
+    }, 1000); // Aktualisierung/Führt die Funtkion alle 1 Sekunde aus
+
+}
+
+function stop() {
+    if (laufAktiv == false) {
+        alert("Die Zeit läuft derzeit nicht.");
+        return;
+    }
+    clearInterval(timer);
+    laufAktiv = false;
+}
+
+function zeitAnzeigen(zeitInMillisekunden) {
+    var sekundenGesamt = Math.floor(zeitInMillisekunden / 1000);
+    var stunden = Math.floor(sekundenGesamt / 3600);
+    var minuten = Math.floor((sekundenGesamt % 3600) / 60);
+    var sekunden = sekundenGesamt % 60;
+
+    if (stunden < 10) {
+        stunden = "0" + stunden;
+    }
+
+    if (minuten < 10) {
+        minuten = "0" + minuten;
+    }
+
+    if (sekunden < 10) {
+        sekunden = "0" + sekunden;
+    }
+    document.getElementById("zeitAnzeige").innerHTML = stunden + ":" + minuten + ":" + sekunden;
+
 }
 
 //Massstabsbalken
